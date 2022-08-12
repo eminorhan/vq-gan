@@ -1,0 +1,18 @@
+Working with z of shape (1, 256, 16, 16) = 65536 dimensions.
+loaded pretrained LPIPS loss from taming/modules/autoencoder/lpips/vgg.pth
+VQLPIPSWithDiscriminator running with hinge loss.
+Working with z of shape (1, 256, 32, 32) = 262144 dimensions.
+Working with z of shape (1, 256, 32, 32) = 262144 dimensions.
+loaded pretrained LPIPS loss from taming/modules/autoencoder/lpips/vgg.pth
+VQLPIPSWithDiscriminator running with hinge loss.
+input is of size: torch.Size([1, 3, 256, 256])
+VQGAN --- GumbelVQ: latent shape: torch.Size([32, 32])
+z.max(), z.min(): tensor(4.7139, device='cuda:0', grad_fn=<MaxBackward1>) tensor(-4.3338, device='cuda:0', grad_fn=<MinBackward1>)
+indices.shape, indices.max(), indices.min(): torch.Size([1, 32, 32]) tensor(8178, device='cuda:0') tensor(10, device='cuda:0')
+VQGAN --- VQModel: latent shape: torch.Size([16, 16])
+z.max(), z.min(): tensor(4.6024, device='cuda:0', grad_fn=<MaxBackward1>) tensor(-4.9208, device='cuda:0', grad_fn=<MinBackward1>)
+indices.shape, indices.max(), indices.min(): torch.Size([256]) tensor(16301, device='cuda:0') tensor(167, device='cuda:0')
+VQGAN --- VQModel: latent shape: torch.Size([32, 32])
+z.max(), z.min(): tensor(6.9075, device='cuda:0', grad_fn=<MaxBackward1>) tensor(-7.5006, device='cuda:0', grad_fn=<MinBackward1>)
+indices.shape, indices.max(), indices.min(): torch.Size([1024]) tensor(8178, device='cuda:0') tensor(6, device='cuda:0')
+Done

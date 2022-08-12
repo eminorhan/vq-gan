@@ -1,0 +1,13 @@
+# File extensions
+*.pt
+*.pth
+*.tar
+*.ckpt
+
+# Files
+train.txt
+test.txt
+
+# Directories
+**/__pycache__/
+/taming_transformers.egg-info
