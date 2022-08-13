@@ -5,8 +5,14 @@
 *.ckpt
 
 # Files
-train.txt
-test.txt
+train_say.txt
+train_s.txt
+train_a.txt
+train_y.txt
+test_say.txt
+test_s.txt
+test_a.txt
+test_y.txt
 
 # Directories
 **/__pycache__/
