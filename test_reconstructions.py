@@ -28,7 +28,7 @@ def preprocess(img, target_image_size=256):
     r = target_image_size / s
     s = (round(r * img.size[1]), round(r * img.size[0]))
     img = TF.resize(img, s, interpolation=PIL.Image.LANCZOS)
-    img = TF.center_crop(img, output_size=2 * [target_image_size])
+    img = TF.center_crop(img, output_size=2*[target_image_size])
     img = torch.unsqueeze(T.ToTensor()(img), 0)
     return img
 
@@ -36,10 +36,10 @@ def stack_reconstructions(input, x0, x1, x2, titles=[]):
   assert input.size == x1.size
   w, h = input.size[0], input.size[1]
   img = Image.new("RGB", (4*w, h))
-  img.paste(input, (0,0))
-  img.paste(x0, (1*w,0))
-  img.paste(x1, (2*w,0))
-  img.paste(x2, (3*w,0))
+  img.paste(input, (0, 0))
+  img.paste(x0, (1*w, 0))
+  img.paste(x1, (2*w, 0))
+  img.paste(x2, (3*w, 0))
 
   for i, title in enumerate(titles):
     ImageDraw.Draw(img).text((i*w, 0), f'{title}', (255, 255, 255), font=font)  # coordinates, text, color, font
@@ -69,8 +69,8 @@ def custom_to_pil(x):
   x = x.detach().cpu()
   x = torch.clamp(x, -1., 1.)
   x = (x + 1.)/2.
-  x = x.permute(1,2,0).numpy()
-  x = (255*x).astype(np.uint8)
+  x = x.permute(1, 2, 0).numpy()
+  x = (255 * x).astype(np.uint8)
   x = Image.fromarray(x)
   if not x.mode == "RGB":
     x = x.convert("RGB")

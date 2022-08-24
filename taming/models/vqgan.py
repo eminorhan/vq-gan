@@ -10,19 +10,7 @@ from taming.modules.vqvae.quantize import GumbelQuantize
 from taming.modules.vqvae.quantize import EMAVectorQuantizer
 
 class VQModel(pl.LightningModule):
-    def __init__(self,
-                 ddconfig,
-                 lossconfig,
-                 n_embed,
-                 embed_dim,
-                 ckpt_path=None,
-                 ignore_keys=[],
-                 image_key="image",
-                 colorize_nlabels=None,
-                 monitor=None,
-                 remap=None,
-                 sane_index_shape=False,  # tell vector quantizer to return indices as bhw
-                 ):
+    def __init__(self, ddconfig, lossconfig, n_embed, embed_dim, ckpt_path=None, ignore_keys=[], image_key="image", colorize_nlabels=None, monitor=None, remap=None, sane_index_shape=False):
         super().__init__()
         self.image_key = image_key
         self.encoder = Encoder(**ddconfig)

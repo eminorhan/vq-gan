@@ -1,0 +1,5 @@
+lightning:
+  trainer:
+    distributed_backend: ddp
+    gpus: 0,1,2,3
+    resume_from_checkpoint: /misc/vlgscratch4/LakeGroup/emin/taming-transformers/logs/2022-08-18T21-35-31_custom_vqgan_32x32_y/checkpoints/last.ckpt
