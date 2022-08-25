@@ -1,5 +1,4 @@
-import io
-import requests
+import os
 import PIL
 from PIL import Image
 from PIL import ImageDraw, ImageFont
@@ -14,11 +13,6 @@ import torchvision.transforms.functional as TF
 
 font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf", 22)
 
-def download_image(url):
-    resp = requests.get(url)
-    resp.raise_for_status()
-    return PIL.Image.open(io.BytesIO(resp.content))
-
 def preprocess(img, target_image_size=256):
     s = min(img.size)
     
@@ -32,14 +26,17 @@ def preprocess(img, target_image_size=256):
     img = torch.unsqueeze(T.ToTensor()(img), 0)
     return img
 
-def stack_reconstructions(input, x0, x1, x2, titles=[]):
+def stack_reconstructions(input, x0, x1, x2, x3, x4, x5, titles=[]):
   assert input.size == x1.size
   w, h = input.size[0], input.size[1]
-  img = Image.new("RGB", (4*w, h))
+  img = Image.new("RGB", (7*w, h))
   img.paste(input, (0, 0))
   img.paste(x0, (1*w, 0))
   img.paste(x1, (2*w, 0))
   img.paste(x2, (3*w, 0))
+  img.paste(x3, (4*w, 0))
+  img.paste(x4, (5*w, 0))
+  img.paste(x5, (6*w, 0))
 
   for i, title in enumerate(titles):
     ImageDraw.Draw(img).text((i*w, 0), f'{title}', (255, 255, 255), font=font)  # coordinates, text, color, font
@@ -86,26 +83,46 @@ def reconstruct_with_vqgan(x, model):
   return xrec
 
 def reconstruction_pipeline(url, size=256):
-  x_vqgan = preprocess(download_image(url), target_image_size=size)
+  x_vqgan = preprocess(PIL.Image.open(url), target_image_size=size)
   x_vqgan = x_vqgan.to("cuda:0")
   
   print(f"input is of size: {x_vqgan.shape}")
-  x0 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model32x32)
-  x1 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model16384)
-  x2 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), modelsaycam)
-  img = stack_reconstructions(custom_to_pil(preprocess_vqgan(x_vqgan[0])), custom_to_pil(x0[0]), custom_to_pil(x1[0]), custom_to_pil(x2[0]), titles=titles)
+  x0 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_openimages)
+  x1 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_imagenet)
+  x2 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_say)
+  x3 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_s)
+  x4 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_a)
+  x5 = reconstruct_with_vqgan(preprocess_vqgan(x_vqgan), model_y)
+
+  img = stack_reconstructions(custom_to_pil(preprocess_vqgan(x_vqgan[0])), 
+                              custom_to_pil(x0[0]), custom_to_pil(x1[0]), custom_to_pil(x2[0]), 
+                              custom_to_pil(x3[0]), custom_to_pil(x4[0]), custom_to_pil(x5[0]),
+                              titles=titles
+                              )
 
   return img
 
 if __name__ == "__main__":
-    config16384 = load_config("logs/vqgan_imagenet_f16_16384/configs/model.yaml", display=False)
-    model16384 = load_vqgan(config16384, ckpt_path="logs/vqgan_imagenet_f16_16384/checkpoints/last.ckpt").to("cuda:0")
+    config_imagenet = load_config("logs/vqgan_imagenet_f16_16384/configs/model.yaml", display=False)
+    model_imagenet = load_vqgan(config_imagenet, ckpt_path="logs/vqgan_imagenet_f16_16384/checkpoints/last.ckpt").to("cuda:0")
 
-    config32x32 = load_config("logs/vqgan_gumbel_f8/configs/model.yaml", display=False)
-    model32x32 = load_vqgan(config32x32, ckpt_path="logs/vqgan_gumbel_f8/checkpoints/last.ckpt", is_gumbel=True).to("cuda:0")
+    config_openimages = load_config("logs/vqgan_gumbel_f8/configs/model.yaml", display=False)
+    model_openimages = load_vqgan(config_openimages, ckpt_path="logs/vqgan_gumbel_f8/checkpoints/last.ckpt", is_gumbel=True).to("cuda:0")
 
-    configsaycam = load_config("logs/2022-08-07T20-31-31_custom_vqgan_32x32/configs/2022-08-09T20-37-58-project.yaml", display=False)
-    modelsaycam = load_vqgan(configsaycam, ckpt_path="logs/2022-08-07T20-31-31_custom_vqgan_32x32/checkpoints/last.ckpt").to("cuda:0")
+    config_say = load_config("logs/2022-08-07T20-31-31_custom_vqgan_32x32_say/configs/2022-08-09T20-37-58-project.yaml", display=False)
+    model_say = load_vqgan(config_say, ckpt_path="logs/2022-08-07T20-31-31_custom_vqgan_32x32_say/checkpoints/last.ckpt").to("cuda:0")
 
-    titles=["Input", "OpenImgs (f8, 8192)", "OpenImgs (f16, 16384)", "SAYCam (f8, 8192)"]
-    reconstruction_pipeline(url='https://heibox.uni-heidelberg.de/f/7bb608381aae4539ba7a/?dl=1', size=256)
+    config_s = load_config("logs/2022-08-15T21-05-50_custom_vqgan_32x32_s/configs/2022-08-19T19-37-48-project.yaml", display=False)
+    model_s = load_vqgan(config_s, ckpt_path="logs/2022-08-15T21-05-50_custom_vqgan_32x32_s/checkpoints/last.ckpt").to("cuda:0")
+
+    config_a = load_config("logs/2022-08-17T19-36-46_custom_vqgan_32x32_a/configs/2022-08-20T21-36-31-project.yaml", display=False)
+    model_a = load_vqgan(config_a, ckpt_path="logs/2022-08-17T19-36-46_custom_vqgan_32x32_a/checkpoints/last.ckpt").to("cuda:0")
+
+    config_y = load_config("logs/2022-08-18T21-35-31_custom_vqgan_32x32_y/configs/2022-08-21T19-38-06-project.yaml", display=False)
+    model_y = load_vqgan(config_y, ckpt_path="logs/2022-08-18T21-35-31_custom_vqgan_32x32_y/checkpoints/last.ckpt").to("cuda:0")
+
+    titles=["image", "openimages_32x32_8192", "imagenet_16x16_16384", "say_32x32_8192", "s_32x32_8192", "a_32x32_8192", "y_32x32_8192"]
+    test_img_dir = '/misc/vlgscratch4/LakeGroup/emin/taming-transformers/test_images'
+    test_img = 'saycam_5.jpeg' 
+  
+    reconstruction_pipeline(url=os.path.join(test_img_dir, test_img), size=256)
