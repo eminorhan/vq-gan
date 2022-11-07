@@ -3,6 +3,7 @@
 *.pth
 *.tar
 *.ckpt
+*.out
 
 # Files
 train_say.txt
